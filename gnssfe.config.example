@@ -1,0 +1,9 @@
+[
+{feapi, [
+	{redis, {"localhost", 6379}},
+	{pgsql, {{0,0,0,0,0,0,0,1},"dbname","username","pass"}},
+	{mongodb, [ {host, "10.6.0.7"}, {port, 27017}, {database, <<"dbname">>} ]},
+	{geocoder, <<"http://10.0.0.232/nominatim/reverse.php?format=json&lat=%LAT%lon=%LON%&zoom=18&addressdetails=0">>},
+	{pushstream, {"http://localhost/pub?id="}}
+]}
+].
