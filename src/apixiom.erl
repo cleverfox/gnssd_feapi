@@ -4,7 +4,8 @@
 
 -export([
 		 handle/4,
-		 before_filter/1
+		 before_filter/1,
+		 bodyjs/1
 		]).
 
 
@@ -36,6 +37,11 @@ before_filter(Req) ->
 			Req
 	end.
 
+bodyjs(Req) ->
+	{ReqJSON,_}=cowboy_req:meta(request_json, Req),
+	ReqJSON.
+
+
 %% Internals
 
 handle_json(Method, Path, Req, Target) ->
@@ -53,6 +59,9 @@ handle_json(Method, Path, Req, Target) ->
 		error:function_clause ->
 			case erlang:get_stacktrace() of
 				[{Target,h,_,_}|_] ->
+					{ReqPath, _} = cowboy_req:path(Req),
+					{404, #{error=><<"not found">>,path=>ReqPath}};
+				[{_,h,[Method,Path,_],_}|_] ->
 					{ReqPath, _} = cowboy_req:path(Req),
 					{404, #{error=><<"not found">>,path=>ReqPath}};
 				Stack ->
