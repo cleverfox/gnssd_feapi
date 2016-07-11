@@ -3,3 +3,4 @@ log
 ebin
 deps
 .rebar
+gnss_feapi.wiki
