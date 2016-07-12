@@ -22,6 +22,10 @@ handle(Method, Path, Req) ->
 	
 h(Method, [<<"auth">>|_]=Path, Req) ->
 	feapi_user:h(Method, Path, Req); 
+h(Method, [<<"device">>|_]=Path, Req) ->
+	feapi_device:h(Method, Path, Req); 
+h(Method, [<<"sub">>|_]=Path, Req) ->
+	feapi_subs:h(Method, Path, Req); 
 
 
 h(<<"GET">>, [<<"hi">>, Name], _Req) ->
