@@ -64,15 +64,16 @@ add_devsubs(SessionID,Devices,Replace) ->
 			   if Replace -> eredis:q(W,[ "del", iolist_to_binary(["esub:position:",SessionID]) ]);
 				  true -> ok
 			   end,
-			   case eredis:q(W,[ "sadd", iolist_to_binary(["esub:position:",SessionID]) |Devices ]) of
+			   R=case eredis:q(W,[ "sadd", iolist_to_binary(["esub:position:",SessionID]) |Devices ]) of
 				   {ok, List} ->
-					   eredis:q(W,[ "expire", iolist_to_binary(["esub:position:",SessionID]), 7200 ]),
-					   eredis:q(W,[ "publish", "esub:position", iolist_to_binary(["esub:position:",SessionID]) ]),
 					   List;
 				   Any -> 
 					   lager:error("Redis returns ~p",[Any]),
 					   []
-			   end
+			   end,
+			   eredis:q(W,[ "expire", iolist_to_binary(["esub:position:",SessionID]), 7200 ]),
+			   eredis:q(W,[ "publish", "esub:position", iolist_to_binary(["esub:position:",SessionID]) ]),
+			   R
 	   end,
 	poolboy:transaction(fe_redis,RF).
 

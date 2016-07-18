@@ -32,6 +32,8 @@ h(<<"GET">>, [<<"auth">>,<<"whoami">>], Req) ->
 	end;
 	
 h(<<"POST">>, [<<"auth">>,<<"logout">>], Req) ->
+	{SessionID, _Req1} = cowboy_req:meta(session_id, Req),
+	dbapi:add_devsubs(SessionID,[],true),
 	axiom_session:delete(Req),
 	{200, #{ok=>1}}.
 
