@@ -15,7 +15,8 @@ h(<<"POST">>,[<<"auth">>,<<"login">>], Req) ->
 		true ->
 			axiom_session:set(username, Username, Req),
 			axiom_session:set(cur_user, U, Req),
-			{200, #{ok=>1, user=>maps:remove(encrypted_password,U) } };
+			{SessionID, _Req1} = cowboy_req:meta(session_id, Req),
+			{200, #{ok=>1, user=>maps:remove(encrypted_password,U),session=>SessionID } };
 		false ->
 			{401, #{error=>unauthorized}}
 	end;
@@ -24,7 +25,8 @@ h(<<"POST">>,[<<"auth">>,<<"login">>], Req) ->
 h(<<"GET">>, [<<"auth">>,<<"whoami">>], Req) ->
 	case axiom_session:get(cur_user, Req) of
 		User when is_map(User) ->
-			{200, #{user=>maps:remove(encrypted_password,User)}};
+			{SessionID, _Req1} = cowboy_req:meta(session_id, Req),
+			{200, #{user=>maps:remove(encrypted_password,User),session=>SessionID}};
 		undefined -> 
 			{401, #{error=>unauthorized}}
 	end;
