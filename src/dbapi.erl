@@ -3,6 +3,8 @@
 -export([db2map/2,
 		 redis_hash_to_map/1,
 		 fetch_devices/2,
+		 fetch_pois/2,
+		 list_pois/2,
 		 list_devices/2,
 		 get_devstate/1,
 		 get_devsubs/1,
@@ -26,10 +28,38 @@ redis_hash_to_map([Key,Val|Rest],Accumulated) ->
 					  maps:put(Key, Val, Accumulated)
 					 ).
 
+geo2json(<<"MULTIPOINT(",Bin/binary>>) ->
+	Points=hd(binary:split(Bin,<<")">>)),
+	lists:map(fun(Pair) ->
+					  [Bx,By]=binary:split(Pair,<<" ">>,[global]),
+					  [
+					   try binary_to_float(Bx) catch error:badarg -> binary_to_integer(Bx) end, 
+					   try binary_to_float(By) catch error:badarg -> binary_to_integer(By) end
+					  ]
+			  end,
+			  binary:split(Points,<<",">>,[global])
+			 );
+
+geo2json(Bin) ->
+	Bin.
+
 
 fetch_devices(Clause,Params) ->
 	{ok,Header,Devices}=psql:equery(fe_pg,"select * from devices where "++Clause,Params),
 	{ok,feapi_tools:db2map(Header, Devices)}.
+
+list_pois(Clause,Params) ->
+	{ok,Header,Devices}=psql:equery(fe_pg,"select id,kind,title,enabled,descr,fill_color,stroke_color,organisation_id from pois where "++Clause,Params),
+	{ok,feapi_tools:db2map(Header, Devices)}.
+
+fetch_pois(Clause,Params) ->
+	{ok,Header,Devices}=psql:equery(fe_pg,"select id,kind,title,enabled,st_astext(coords) as coords,radius,descr,fill_color,stroke_color,organisation_id from pois where "++Clause,Params),
+	{ok,
+	 lists:map(fun(E) ->
+					   maps:put(coords,geo2json(maps:get(coords,E)),E)
+			   end,
+			   feapi_tools:db2map(Header, Devices)
+			  )}.
 
 list_devices(Clause,Params) ->
 	{ok,_Header,Devices}=psql:equery(fe_pg,"select id from devices where "++Clause,Params),

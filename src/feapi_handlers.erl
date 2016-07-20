@@ -26,6 +26,8 @@ h(Method, [<<"device">>|_]=Path, Req) ->
 	feapi_device:h(Method, Path, Req); 
 h(Method, [<<"sub">>|_]=Path, Req) ->
 	feapi_subs:h(Method, Path, Req); 
+h(Method, [<<"poi">>|_]=Path, Req) ->
+	feapi_poi:h(Method, Path, Req); 
 
 
 h(<<"GET">>, [<<"hi">>, Name], _Req) ->
