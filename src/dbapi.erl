@@ -43,7 +43,6 @@ geo2json(<<"MULTIPOINT(",Bin/binary>>) ->
 geo2json(Bin) ->
 	Bin.
 
-
 fetch_devices(Clause,Params) ->
 	{ok,Header,Devices}=psql:equery(fe_pg,"select * from devices where "++Clause,Params),
 	{ok,feapi_tools:db2map(Header, Devices)}.

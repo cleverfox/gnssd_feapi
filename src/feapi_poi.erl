@@ -24,7 +24,12 @@ h(<<"GET">>, [<<"poi">>,<<"get">>,I1], Req) ->
 	OrgId=maps:get(organisation_id,User),
 	Id=binary_to_integer(I1),
 	{ok, POIS} = dbapi:fetch_pois("id=$2 and (organisation_id=0 or organisation_id is null or organisation_id = $1)",[OrgId,Id]),
-	{200, #{ok=>1,pois=>POIS} };
+	Editable=lists:map(fun(E) ->
+							   maps:put(editable,maps:get(organisation_id,E)==OrgId,E)
+					   end,
+					   POIS
+					  ),
+	{200, #{ok=>1,pois=>Editable} };
 
 
 h(<<"GET">>, [<<"poi">>,<<"list">>], Req) ->
